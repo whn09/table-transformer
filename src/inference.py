@@ -721,6 +721,12 @@ class TableExtractionPipeline(object):
                 print("Structure model weights loaded.")
             else:
                 self.str_model = None
+                
+        if not det_model is None:
+            self.det_model = det_model
+            
+        if not str_model is None:
+            self.str_model = str_model
 
 
     def __call__(self, page_image, page_tokens=None):
@@ -884,11 +890,13 @@ def main():
     for count, img_file in enumerate(img_files):
         print("({}/{})".format(count+1, num_files))
         img_path = os.path.join(args.image_dir, img_file)
-        img = Image.open(img_path)
+        if os.path.isdir(img_path):
+            continue
+        img = Image.open(img_path).convert('RGB')
         print("Image loaded.")
 
         if not args.words_dir is None:
-            tokens_path = os.path.join(args.words_dir, img_file.replace(".jpg", "_words.json"))
+            tokens_path = os.path.join(args.words_dir, img_file.replace(".jpg", "_words.json").replace(".png", "_words.json"))
             with open(tokens_path, 'r') as f:
                 tokens = json.load(f)
 
@@ -933,7 +941,7 @@ def main():
             for table_idx, extracted_table in enumerate(extracted_tables):
                 for key, val in extracted_table.items():
                     output_result(key, val, args, extracted_table['image'],
-                                  img_file.replace('.jpg', '_{}.jpg'.format(table_idx)))
+                                  img_file.replace('.jpg', '_{}.jpg'.format(table_idx)).replace('.png', '_{}.jpg'.format(table_idx)))
 
 if __name__ == "__main__":
     main()
