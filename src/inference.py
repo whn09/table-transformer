@@ -892,6 +892,8 @@ def main():
         img_path = os.path.join(args.image_dir, img_file)
         if os.path.isdir(img_path):
             continue
+        if not img_path.endswith('jpg') and not img_path.endswith('png'):
+            continue
         img = Image.open(img_path).convert('RGB')
         print("Image loaded.")
 
