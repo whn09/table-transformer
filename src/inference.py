@@ -542,6 +542,7 @@ def cells_to_html(cells):
     cells = sorted(cells, key=lambda k: min(k['row_nums']))
 
     table = ET.Element("table")
+    table.set('style', 'border-collapse: collapse;')
     current_row = -1
 
     for cell in cells:
@@ -559,10 +560,13 @@ def cells_to_html(cells):
             if cell['column header']:
                 cell_tag = "th"
                 row = ET.SubElement(table, "thead")
+                row.set('style', 'border: 1px solid black;')
             else:
                 cell_tag = "td"
                 row = ET.SubElement(table, "tr")
+                row.set('style', 'border: 1px solid black;')
         tcell = ET.SubElement(row, cell_tag, attrib=attrib)
+        tcell.set('style', 'border: 1px solid black; padding: 5px;')
         tcell.text = cell['cell text']
 
     return str(ET.tostring(table, encoding="unicode", short_empty_elements=False))
@@ -830,35 +834,35 @@ def output_result(key, val, args, img, img_file):
     if key == 'objects':
         if args.verbose:
             print(val)
-        out_file = img_file.replace(".jpg", "_objects.json")
+        out_file = img_file.replace(".jpg", "_objects.json").replace(".png", "_objects.json")
         with open(os.path.join(args.out_dir, out_file), 'w') as f:
             json.dump(val, f)
         if args.visualize:
-            out_file = img_file.replace(".jpg", "_fig_tables.jpg")
+            out_file = img_file.replace(".jpg", "_fig_tables.jpg").replace(".png", "_fig_tables.jpg")
             out_path = os.path.join(args.out_dir, out_file)
             visualize_detected_tables(img, val, out_path)
     elif not key == 'image' and not key == 'tokens':
         for idx, elem in enumerate(val):
             if key == 'crops':
                 for idx, cropped_table in enumerate(val):
-                    out_img_file = img_file.replace(".jpg", "_table_{}.jpg".format(idx))
+                    out_img_file = img_file.replace(".jpg", "_table_{}.jpg".format(idx)).replace(".png", "_table_{}.jpg".format(idx))
                     cropped_table['image'].save(os.path.join(args.out_dir,
                                                                 out_img_file))
-                    out_words_file = out_img_file.replace(".jpg", "_words.json")
+                    out_words_file = out_img_file.replace(".jpg", "_words.json").replace(".png", "_words.json")
                     with open(os.path.join(args.out_dir, out_words_file), 'w') as f:
                         json.dump(cropped_table['tokens'], f)
             elif key == 'cells':
-                out_file = img_file.replace(".jpg", "_{}_objects.json".format(idx))
+                out_file = img_file.replace(".jpg", "_{}_objects.json".format(idx)).replace(".png", "_{}_objects.json".format(idx))
                 with open(os.path.join(args.out_dir, out_file), 'w') as f:
                     json.dump(elem, f)
                 if args.verbose:
                     print(elem)
                 if args.visualize:
-                    out_file = img_file.replace(".jpg", "_fig_cells.jpg")
+                    out_file = img_file.replace(".jpg", "_fig_cells.jpg").replace(".png", "_fig_cells.jpg")
                     out_path = os.path.join(args.out_dir, out_file)
                     visualize_cells(img, elem, out_path)
             else:
-                out_file = img_file.replace(".jpg", "_{}.{}".format(idx, key))
+                out_file = img_file.replace(".jpg", "_{}.{}".format(idx, key)).replace(".png", "_{}.{}".format(idx, key))
                 with open(os.path.join(args.out_dir, out_file), 'w') as f:
                     f.write(elem)
                 if args.verbose:
@@ -895,7 +899,7 @@ def main():
         if not img_path.endswith('jpg') and not img_path.endswith('png'):
             continue
         img = Image.open(img_path).convert('RGB')
-        print("Image loaded.")
+        print("Image loaded.", img_path)
 
         if not args.words_dir is None:
             tokens_path = os.path.join(args.words_dir, img_file.replace(".jpg", "_words.json").replace(".png", "_words.json"))
